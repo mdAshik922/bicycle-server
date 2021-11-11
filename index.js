@@ -13,7 +13,7 @@ app.use(express.json());
 
      
 //initilazition firebase token
-const serviceAccount = require('./bicycle-firebase-adminsdk.json');
+const serviceAccount = JSON.parse(process.env.FIREBASE_BICYCLE_TOKEN);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
