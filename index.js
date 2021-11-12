@@ -65,8 +65,7 @@ app.get('/bicycle', async(req, res)=>{
    app.get('/bicycle/:id', async(req, res)=>{
     const id = req.params.id;
     const query =  {_id: ObjectId(id)};
-    const Byicycle = productCollaction.findOne(query);
- 
+    const Byicycle = await productCollaction.findOne(query);
      res.json(Byicycle);
    });
  
@@ -79,17 +78,16 @@ app.get('/bicycle', async(req, res)=>{
      $set:{
        name: updateName.name
      }
-   }
+   };
    const update = await productCollaction.updateOne(productUpdate, updateDocs, options);
      res.json(update);
  });
  
- // delete product
+ // Delete product
  app.delete('/bicycle/:id', async(req, res) =>{
    const id = req.params.id;
-   // console.log(id)
-   const query = {_id: ObjectId(id)}
-   const result = await productCollaction.deleteOne(query)
+   const query = {_id: ObjectId(id)};
+   const result = await productCollaction.deleteOne(query);
    res.json(result);
  });
  
@@ -102,13 +100,19 @@ app.get('/bicycle', async(req, res)=>{
     const query = {email: email};
     const order = orderCallection.find(query);
     const result = await order.toArray();
-  
     res.json(result);
-  }
+  };
   
-   res.status(401).json({message: 'user not authorized'})
+   res.status(401).json({message: 'user not authorized'});
  });
  
+ app.get('/order/:id', async(req, res)=>{
+  const id = req.params.id;
+  const query =  {_id: ObjectId(id)};
+  const order = await orderCallection.findOne(query);
+   res.json(order);
+ });
+
  app.post('/order', async(req,res) =>{
  const order = req.body;
  const allOrder = await orderCallection.insertOne(order);
@@ -118,8 +122,7 @@ app.get('/bicycle', async(req, res)=>{
  //delete order
  app.delete('/order/:id', async(req, res) =>{
    const id = req.params.id;
-   // console.log(id)
-   const query = {_id: ObjectId(id)}
+   const query = {_id: ObjectId(id)};
    const result = await orderCallection.deleteOne(query);
    res.json(result);
  });
@@ -129,9 +132,7 @@ app.get('/bicycle', async(req, res)=>{
  
  app.post('/review', async(req,res) =>{
  const review = req.body;
- 
  const allReview = await reviewCallection.insertOne(review);
- // console.log('message',allMessage)
      res.json(allReview);
  });
  
@@ -145,22 +146,19 @@ app.get('/bicycle', async(req, res)=>{
   //all coustomers
  app.post('/users', async(req,res) =>{
  const user = req.body;
- 
  const allUser = await userCallection.insertOne(user);
- 
      res.json(allUser);
  });
  
  
  app.put ('/users', async(req, res)=>{
    const user = req.body;
-  //  console.log('put', user)
    const filter = {email: user.email};
    const options = {upsert: true};
    const updataDocs = {$set: user};
    const result = await userCallection.updateOne(filter, options, updataDocs);
- ;  res.json(result);
- })
+   res.json(result);
+ });
  
  
  app.put('/users/admin', verifyToken, async(req, res)=>{
@@ -173,11 +171,11 @@ app.get('/bicycle', async(req, res)=>{
    const updataDocs = {$set: {role: 'admin'}};
    const result = await userCallection.updateOne(filter, updataDocs);
    res.json(result);
-  }
-   }
+                                    };
+             }
   else{
     res.status(403).json({message: 'sorry you have not access'});
-  }
+      };
  });
  
  
@@ -188,7 +186,7 @@ app.get('/bicycle', async(req, res)=>{
    let isAdmin = false;
    if(user?.role === 'admin'){
      isAdmin = true;
-   }
+   };
    res.json({admin:isAdmin});
  });
 
@@ -201,10 +199,10 @@ app.get('/bicycle', async(req, res)=>{
 
 
 app.get('/', (req, res) =>{
-    console.log('thank you')
-    res.send('my server')
+    console.log('thank you');
+    res.send('my server');
 });
 
 app.listen(port, ()=>{
-    console.log('start my last server', port)
+    console.log('start my bicycle server', port)
 })
