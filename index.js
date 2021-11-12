@@ -23,19 +23,24 @@ admin.initializeApp({
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.89jki.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
-async function verifyToken(req, res, next) {
- if(req.headers?.authorization?.startWith('Bearer ')){
-const token = req.headers.authorization.spilt(' ')[1]; 
-};
-  try{
-const decodedUser = await admin.auth().verifyIdToken(token);
-  req.decodedEmail = decodedUser.email;
-}
-  catch{
+//JWT VERIFY
+async function verifyToken (req, res, next){
+  if(req.headers?.authorization?.startsWith('Bearer ')){
+     const idToken = req.headers.authorization.split('Bearer ')[1];
+    //  console.log('seperet ',idToken);
 
-  }
-  next()
-};
+    try{
+const decodedUser = await admin.auth().verifyToken(idToken)
+// console.log('email', decodedUser.email);
+
+req.decodedUserEmail = decodedUser.email
+    }
+    catch{
+
+    }
+}
+next();
+}
 
 async function run() {
     try {
@@ -92,27 +97,24 @@ app.get('/bicycle', async(req, res)=>{
  });
  
  
-  //order manage ment
+  // order management
  
  app.get('/order', verifyToken, async(req, res)=>{
    const email = req.query.email;
+   console.log(email);
    if(req.decodedEmail === email){
     const query = {email: email};
     const order = orderCallection.find(query);
     const result = await order.toArray();
+    console.log(result)
     res.json(result);
   };
   
    res.status(401).json({message: 'user not authorized'});
  });
- 
- app.get('/order/:id', async(req, res)=>{
-  const id = req.params.id;
-  const query =  {_id: ObjectId(id)};
-  const order = await orderCallection.findOne(query);
-   res.json(order);
- });
 
+ 
+//POST mothod
  app.post('/order', async(req,res) =>{
  const order = req.body;
  const allOrder = await orderCallection.insertOne(order);
