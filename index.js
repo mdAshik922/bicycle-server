@@ -27,12 +27,11 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function verifyToken (req, res, next){
   if(req.headers?.authorization?.startsWith('Bearer ')){
      const idToken = req.headers.authorization.split('Bearer ')[1];
-    //  console.log('seperet ',idToken);
-
+  
+    
     try{
-const decodedUser = await admin.auth().verifyToken(idToken)
-// console.log('email', decodedUser.email);
-
+const decodedUser = await admin.auth().verifyToken(idToken);
+// console.log('afterEmail pise', decodedUser.email);
 req.decodedUserEmail = decodedUser.email
     }
     catch{
@@ -99,14 +98,13 @@ app.get('/bicycle', async(req, res)=>{
  
   // order management
  
- app.get('/order', verifyToken, async(req, res)=>{
+ app.get('/order', verifyToken,  async(req, res)=>{
+   console.log(req.headers.authorization);
    const email = req.query.email;
-   console.log(email);
    if(req.decodedEmail === email){
     const query = {email: email};
     const order = orderCallection.find(query);
     const result = await order.toArray();
-    console.log(result)
     res.json(result);
   };
   
