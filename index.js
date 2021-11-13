@@ -98,18 +98,15 @@ app.get('/bicycle', async(req, res)=>{
  
   // order management
  
- app.get('/order', verifyToken,  async(req, res)=>{
-   console.log(req.headers.authorization);
+ app.get('/orders',  async(req, res)=>{
    const email = req.query.email;
-   if(req.decodedEmail === email){
     const query = {email: email};
     const order = orderCallection.find(query);
     const result = await order.toArray();
     res.json(result);
-  };
+  });
   
-   res.status(401).json({message: 'user not authorized'});
- });
+ 
 
  
 //POST mothod
@@ -120,7 +117,7 @@ app.get('/bicycle', async(req, res)=>{
  });
  
  //delete order
- app.delete('/order/:id', async(req, res) =>{
+ app.delete('/orders/:id', async(req, res) =>{
    const id = req.params.id;
    const query = {_id: ObjectId(id)};
    const result = await orderCallection.deleteOne(query);
