@@ -1,19 +1,19 @@
 const express = require('express');
-const app = express();
-require('dotenv').config();
-const admin = require("firebase-admin");
-
-const ObjectId = require('mongodb').ObjectId;
-const cors = require('cors');
 const { MongoClient } = require('mongodb');
-const port = process.env.PORT || 5000;
+require('dotenv').config();
+const cors = require('cors');
+const admin = require("firebase-admin");
+const ObjectId = require('mongodb').ObjectId;
 
+const app = express();
+const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
      
 //initilazition firebase token
-const serviceAccount = JSON.parse(process.env.FIREBASE_BICYCLE_TOKEN);
+ let serviceAccount = JSON.parse(process.env.FIREBASE_BICYCLE_TOKEN);
+ 
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -30,8 +30,8 @@ async function verifyToken (req, res, next){
   
     
     try{
-const decodedUser = await admin.auth().verifyToken(idToken);
-// console.log('afterEmail pise', decodedUser.email);
+const decodedUser = await admin.auth().verifyIdToken(idToken);
+
 req.decodedUserEmail = decodedUser.email
     }
     catch{
@@ -49,7 +49,6 @@ async function run() {
       const reviewCallection = database.collection('review');
       const orderCallection = database.collection('order');
       const userCallection = database.collection('users');
-
 
     // Get All Product
 
@@ -98,7 +97,7 @@ app.get('/bicycle', async(req, res)=>{
  
   // order management
  
- app.get('/orders',  async(req, res)=>{
+ app.get('/orders', verifyToken,  async(req, res)=>{
    const email = req.query.email;
     const query = {email: email};
     const order = orderCallection.find(query);
@@ -160,7 +159,9 @@ app.get('/bicycle', async(req, res)=>{
  
  app.put('/users/admin', verifyToken, async(req, res)=>{
    const user = req.body;
-   const Admin= req.decodedEmail;
+   console.log('put', req.decodedUserEmail);
+
+   const Admin= req.decodedUserEmail;
    if(Admin){
      const adminAccount = await userCallection.findOne({email: admin});
   if(adminAccount.role === 'admin'){
@@ -174,6 +175,7 @@ app.get('/bicycle', async(req, res)=>{
     res.status(403).json({message: 'sorry you have not access'});
       };
  });
+ 
  
  
  app.get('/users/:email', async(req, res) =>{
