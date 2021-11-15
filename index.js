@@ -1,44 +1,42 @@
-const express = require('express');
-const { MongoClient } = require('mongodb');
-require('dotenv').config();
+const express = require('express')
+const app = express()
 const cors = require('cors');
 const admin = require("firebase-admin");
+require('dotenv').config();
+const { MongoClient } = require('mongodb');
 const ObjectId = require('mongodb').ObjectId;
 
-const app = express();
 const port = process.env.PORT || 5000;
-app.use(cors());
-app.use(express.json());
 
-     
 //initilazition firebase token
- let serviceAccount = JSON.parse(process.env.FIREBASE_BICYCLE_TOKEN);
+let serviceAccount = JSON.parse(process.env.FIREBASE_BICYCLE_TOKEN);
  
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 
+app.use(cors());
+app.use(express.json());
 
+     
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.89jki.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
-//JWT VERIFY
-async function verifyToken (req, res, next){
-  if(req.headers?.authorization?.startsWith('Bearer ')){
-     const idToken = req.headers.authorization.split(' ')[1];
-  
-    
-    try{
-const decodedUser = await admin.auth().verifyIdToken(idToken);
+async function verifyToken(req, res, next) {
+  if (req.headers?.authorization?.startsWith('Bearer ')) {
+      const token = req.headers.authorization.split(' ')[1];
 
-req.decodedUserEmail = decodedUser.email
-    }
-    catch{
+      try {
+          const decodedUser = await admin.auth().verifyIdToken(token);
+          req.decodedEmail = decodedUser.email;
+      }
+      catch {
 
-    }
-}
-next();
+      }
+
+  }
+  next();
 }
 
 async function run() {
@@ -48,7 +46,9 @@ async function run() {
       const productCollaction = database.collection('bicycle')
       const reviewCallection = database.collection('review');
       const orderCallection = database.collection('order');
-      const userCallection = database.collection('users');
+      const usersCollection = database.collection('users');
+
+ 
 
     // Get All Product
 
@@ -142,7 +142,7 @@ app.get('/bicycle', async(req, res)=>{
   //all coustomers
  app.post('/users', async(req,res) =>{
  const user = req.body;
- const allUser = await userCallection.insertOne(user);
+ const allUser = await usersCollection.insertOne(user);
      res.json(allUser);
  });
  
@@ -152,36 +152,35 @@ app.get('/bicycle', async(req, res)=>{
    const filter = {email: user.email};
    const options = {upsert: true};
    const updataDocs = {$set: user};
-   const result = await userCallection.updateOne(filter, options, updataDocs);
+   const result = await usersCollection.updateOne(filter, options, updataDocs);
    res.json(result);
  });
  
  
- app.put('/users/admin', verifyToken, async(req, res)=>{
-   const user = req.body;
-   console.log('put', req.decodedUserEmail);
+ app.put('/users/admin', verifyToken, async (req, res) => {
+  const user = req.body;
+  const requester = req.decodedEmail;
+  if (requester) {
+      const requesterAccount = await usersCollection.findOne({ email: requester });
+      if (requesterAccount.role === 'admin') {
+          const filter = { email: user.email };
+          const updateDoc = { $set: { role: 'admin' } };
+          const result = await usersCollection.updateOne(filter, updateDoc);
+          res.json(result);
+      }
+  }
+  else {
+      res.status(403).json({ message: 'you do not have access to make admin' })
+  }
 
-   const Admin= req.decodedUserEmail;
-   if(Admin){
-     const adminAccount = await userCallection.findOne({email: admin});
-  if(adminAccount.role === 'admin'){
-   const filter = {email: user.email};
-   const updataDocs = {$set: {role: 'admin'}};
-   const result = await userCallection.updateOne(filter, updataDocs);
-   res.json(result);
-                                    };
-             }
-  else{
-    res.status(403).json({message: 'sorry you have not access'});
-      };
- });
+})
  
  
  
  app.get('/users/:email', async(req, res) =>{
    const email = req.params.email;
    const query = {email: email};
-   const user = await userCallection.findOne(query);
+   const user = await usersCollection.findOne(query);
    let isAdmin = false;
    if(user?.role === 'admin'){
      isAdmin = true;
