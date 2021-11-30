@@ -44,17 +44,16 @@ async function run() {
       await client.connect();
       const database = client.db('my_bicycle');
       const productCollaction = database.collection('bicycle')
-      const reviewCallection = database.collection('review');
-      const orderCallection = database.collection('order');
+      const reviewCollection = database.collection('review');
+      const orderCollection = database.collection('order');
       const usersCollection = database.collection('users');
-
- 
+      
 
     // Get All Product
 
 app.get('/bicycle', async(req, res)=>{
-  const AllByicycle = productCollaction.find({})
-  const result = await AllByicycle.toArray()
+  const AllBicycle = productCollaction.find({})
+  const result = await AllBicycle.toArray()
    res.json(result)
  });
  
@@ -68,8 +67,8 @@ app.get('/bicycle', async(req, res)=>{
    app.get('/bicycle/:id', async(req, res)=>{
     const id = req.params.id;
     const query =  {_id: ObjectId(id)};
-    const Byicycle = await productCollaction.findOne(query);
-     res.json(Byicycle);
+    const Bicycle = await productCollaction.findOne(query);
+     res.json(Bicycle);
    });
  
  app.put('/bicycle/:id', async(req, res) =>{
@@ -100,7 +99,7 @@ app.get('/bicycle', async(req, res)=>{
  app.get('/orders', verifyToken,  async(req, res)=>{
    const email = req.query.email;
     const query = {email: email};
-    const order = orderCallection.find(query);
+    const order = orderCollection.find(query);
     const result = await order.toArray();
     res.json(result);
   });
@@ -108,10 +107,10 @@ app.get('/bicycle', async(req, res)=>{
  
 
  
-//POST mothod
+//POST method
  app.post('/order', async(req,res) =>{
  const order = req.body;
- const allOrder = await orderCallection.insertOne(order);
+ const allOrder = await orderCollection.insertOne(order);
      res.json(allOrder);
  });
  
@@ -119,27 +118,36 @@ app.get('/bicycle', async(req, res)=>{
  app.delete('/orders/:id', async(req, res) =>{
    const id = req.params.id;
    const query = {_id: ObjectId(id)};
-   const result = await orderCallection.deleteOne(query);
+   const result = await orderCollection.deleteOne(query);
    res.json(result);
  });
+
+
+
+ app.get('/bicyclePayment/:id', async(req, res)=>{
+  const id = req.params.id;
+  const query = {_id: ObjectId(id)};
+  const result = await orderCollection.findOne(query);
+  res.json(result);
+});
  
  
  // user comment
  
  app.post('/review', async(req,res) =>{
  const review = req.body;
- const allReview = await reviewCallection.insertOne(review);
+ const allReview = await reviewCollection.insertOne(review);
      res.json(allReview);
  });
  
  app.get('/review', async(req, res)=>{
-   const AllReview = reviewCallection.find({});
+   const AllReview = reviewCollection.find({});
    const result = await AllReview.toArray();
     res.json(result);
   });
  
  
-  //all coustomers
+  //all customer
  app.post('/users', async(req,res) =>{
  const user = req.body;
  const allUser = await usersCollection.insertOne(user);
@@ -167,13 +175,13 @@ app.get('/bicycle', async(req, res)=>{
           const updateDoc = { $set: { role: 'admin' } };
           const result = await usersCollection.updateOne(filter, updateDoc);
           res.json(result);
-      }
+      };
   }
   else {
       res.status(403).json({ message: 'you do not have access to make admin' })
   }
 
-})
+});
  
  
  
@@ -188,6 +196,10 @@ app.get('/bicycle', async(req, res)=>{
    res.json({admin:isAdmin});
  });
 
+
+
+
+ 
     } finally {
       // Ensures that the client will close when you finish/error
     //   await client.close();
@@ -202,5 +214,5 @@ app.get('/', (req, res) =>{
 });
 
 app.listen(port, ()=>{
-    console.log('start my bicycle server', port)
-})
+    console.log('start my bicycle server', port);
+});
