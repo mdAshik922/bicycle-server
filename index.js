@@ -5,7 +5,7 @@ const admin = require("firebase-admin");
 require('dotenv').config();
 const { MongoClient } = require('mongodb');
 const ObjectId = require('mongodb').ObjectId;
-
+const stripe = require('stripe')(process.env.STRIPE_SECRET);
 const port = process.env.PORT || 5000;
 
 //initilazition firebase token
@@ -198,7 +198,22 @@ app.get('/bicycle', async(req, res)=>{
 
 
 
+ app.post("/create-payment-intent", async (req, res) => {
+   const paymentsInfo = req.body;
+  
+const ammount = paymentsInfo.price*100;
+  // Create a PaymentIntent with the order amount and currency
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: calculateOrderAmount(items),
+    currency: "usd",
+    ammount: ammount,
+    payment_methods_types: ['card']
+  });
 
+  res.send({
+    clientSecret: paymentIntent.client_secret,
+  });
+});
  
     } finally {
       // Ensures that the client will close when you finish/error
