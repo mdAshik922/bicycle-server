@@ -33,11 +33,11 @@ async function verifyToken(req, res, next) {
       }
       catch {
 
-      }
+      };
 
-  }
+  };
   next();
-}
+};
 
 async function run() {
     try {
@@ -52,8 +52,8 @@ async function run() {
     // Get All Product
 
 app.get('/bicycle', async(req, res)=>{
-  const AllBicycle = productCollaction.find({})
-  const result = await AllBicycle.toArray()
+  const AllBicycle = productCollaction.find({});
+  const result = await AllBicycle.toArray();
    res.json(result)
  });
  
