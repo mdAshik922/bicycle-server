@@ -201,12 +201,12 @@ app.get('/bicycle', async(req, res)=>{
  app.post("/create-payment-intent", async (req, res) => {
    const paymentsInfo = req.body;
   
-const ammount = paymentsInfo.price*100;
+const amount = paymentsInfo.price*100;
   // Create a PaymentIntent with the order amount and currency
   const paymentIntent = await stripe.paymentIntents.create({
     amount: calculateOrderAmount(items),
     currency: "usd",
-    ammount: ammount,
+    amount: amount,
     payment_methods_types: ['card']
   });
 
@@ -215,6 +215,18 @@ const ammount = paymentsInfo.price*100;
   });
 });
  
+
+app.put('/payment_update/:id'), async(req, res) =>{
+  const id = req.params.id;
+  const payment = req.body;
+  const filter = {_id: ObjectId(id)};
+  const updateDoc = {
+    $set: { payment: payment }
+  };
+const result = await orderCollection.updateOne(filter, updateDoc);
+res.json(result);
+};
+
     } finally {
       // Ensures that the client will close when you finish/error
     //   await client.close();
