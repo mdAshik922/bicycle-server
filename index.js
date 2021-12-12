@@ -96,7 +96,7 @@ app.get('/bicycle', async(req, res)=>{
  
   // order management
  
- app.get('/orders', verifyToken,  async(req, res)=>{
+ app.get('/orders',   async(req, res)=>{
    const email = req.query.email;
     const query = {email: email};
     const order = orderCollection.find(query);
@@ -114,14 +114,11 @@ app.get('/bicycle', async(req, res)=>{
      res.json(allOrder);
  });
 
- app.get('/orders', async(req,res) =>{
-  const email = req.params.email;
-  console.log(email);
-  const query = { email: email };
- const findOrder = await orderCollection.findOne(query);
- const allOrder = await findOrder.toArray()
-     res.json(allOrder);
- });
+app.get('/allOrder/:email', async (req, res)=>{
+  const order = req.body;
+  const result = await orderCollection.find(order);
+  res.json(result)
+})
  
  //delete order
  app.delete('/orders/:id', async(req, res) =>{
