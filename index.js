@@ -113,6 +113,15 @@ app.get('/bicycle', async(req, res)=>{
  const allOrder = await orderCollection.insertOne(order);
      res.json(allOrder);
  });
+
+ app.get('/orders', async(req,res) =>{
+  const email = req.params.email;
+  console.log(email);
+  const query = { email: email };
+ const findOrder = await orderCollection.findOne(query);
+ const allOrder = await findOrder.toArray()
+     res.json(allOrder);
+ });
  
  //delete order
  app.delete('/orders/:id', async(req, res) =>{
