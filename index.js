@@ -114,11 +114,7 @@ app.get('/bicycle', async(req, res)=>{
      res.json(allOrder);
  });
 
-app.get('/allOrder/:email', async (req, res)=>{
-  const order = req.body;
-  const result = await orderCollection.find(order);
-  res.json(result)
-})
+
  
  //delete order
  app.delete('/orders/:id', async(req, res) =>{
