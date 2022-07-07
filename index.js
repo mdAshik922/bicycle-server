@@ -25,7 +25,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 async function verifyToken(req, res, next) {
   if (req.headers?.authorization?.startsWith('Bearer ')) {
-      const token = req.headers.authorization.split(' ')[1];
+      const token = req.headers.authorization.split(' ')[1]
 
       try {
           const decodedUser = await admin.auth().verifyIdToken(token);
